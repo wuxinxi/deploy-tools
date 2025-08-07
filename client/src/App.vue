@@ -146,11 +146,55 @@ const handleMenuSelect = (index) => {
 
 .el-menu-item:hover,
 .el-sub-menu__title:hover {
+  background-color: #1890ff !important;
+  color: #fff !important;
+}
+
+.el-menu-vertical-demo .el-sub-menu__title:hover {
+  background-color: #1890ff !important;
+}
+
+.el-sub-menu__title:hover .el-icon,
+.el-sub-menu__title:hover span {
+  color: #fff !important;
+}
+
+.el-menu-vertical-demo .el-sub-menu__title:hover .el-icon,
+.el-menu-vertical-demo .el-sub-menu__title:hover span {
+  color: #fff !important;
+}
+
+.el-menu-item.is-active {
   background-color: #1890ff;
   color: #fff;
 }
 
-.el-menu-item.is-active {
+/* 修复二级菜单样式 */
+.el-sub-menu .el-menu {
+  background-color: #001529 !important;
+}
+
+.el-sub-menu .el-menu .el-menu-item {
+  color: rgba(255, 255, 255, 0.7);
+  background-color: #001529;
+}
+
+/* 确保子菜单标题在hover时的样式 */
+:deep(.el-sub-menu) > .el-sub-menu__title {
+  background-color: #001529;
+}
+
+:deep(.el-sub-menu) > .el-sub-menu__title:hover {
+  background-color: #1890ff !important;
+}
+
+.el-sub-menu .el-menu .el-menu-item:hover,
+.el-sub-menu .el-menu .el-menu-item:focus {
+  background-color: #1890ff;
+  color: #fff;
+}
+
+.el-sub-menu .el-menu .el-menu-item.is-active {
   background-color: #1890ff;
   color: #fff;
 }

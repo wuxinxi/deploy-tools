@@ -20,32 +20,24 @@
         <el-table-column
           prop="name"
           label="服务器名称"
-          width="180"
         ></el-table-column>
         <el-table-column
           prop="ip"
           label="IP地址"
-          width="160"
         ></el-table-column>
         <el-table-column
           prop="port"
           label="SSH端口"
-          width="100"
         ></el-table-column>
         <el-table-column
           prop="username"
           label="用户名"
-          width="140"
         ></el-table-column>
         <el-table-column
           prop="createdAt"
           label="创建时间"
-          width="180"
         ></el-table-column>
-        <el-table-column
-          label="连接状态"
-          width="120"
-        >
+        <el-table-column label="连接状态">
           <template #default="scope">
             <el-tag
               :type="
@@ -62,7 +54,7 @@
         </el-table-column>
         <el-table-column
           label="操作"
-          width="220"
+          width="320"
         >
           <template #default="scope">
             <el-button
