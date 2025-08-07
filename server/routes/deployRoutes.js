@@ -68,7 +68,7 @@ const distUpload = multer({
 // 部署后端应用
 router.post('/backend', jarUpload.single('jarFile'), async (req, res) => {
   try {
-    const { serverId, targetPath, restartScript } = req.body;
+    const { serverId, targetPath, restartScript, serverFileName } = req.body;
     
     // 验证参数
     if (!serverId || !targetPath) {
@@ -118,6 +118,7 @@ router.post('/backend', jarUpload.single('jarFile'), async (req, res) => {
       req.file.path, 
       targetPath, 
       restartScript,
+      serverFileName, // 添加服务器文件名参数
       logCallback
     );
     

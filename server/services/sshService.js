@@ -134,11 +134,12 @@ class SSHService {
    * @param {Object} server - 服务器配置
    * @param {string} localJarPath - 本地JAR文件路径
    * @param {string} targetPath - 远程目标路径
-   * @param {string} restartScript - 重启脚本
+   * @param {string} restartScript - 重启脚本路径
+   * @param {string} serverFileName - 服务器上的文件名
    * @param {Function} logCallback - 日志回调函数
    * @returns {Promise}
    */
-  async deployBackend(server, localJarPath, targetPath, restartScript, logCallback = null) {
+  async deployBackend(server, localJarPath, targetPath, restartScript, serverFileName, logCallback = null) {
     let conn = null;
     
     try {
@@ -155,11 +156,40 @@ class SSHService {
         logCallback
       );
       
-      // 3. 获取文件名
-      const jarFileName = path.basename(localJarPath);
-      const remoteJarPath = `${targetPath}/${jarFileName}`;
+      // 3. 处理文件名和备份逻辑
+      const finalFileName = serverFileName || path.basename(localJarPath);
+      const remoteJarPath = `${targetPath}/${finalFileName}`;
       
-      // 4. 上传JAR文件
+      // 4. 检查文件是否存在，如果存在则备份
+      try {
+        await this.executeCommand(
+          conn,
+          `test -f "${remoteJarPath}"`,
+          logCallback
+        );
+        
+        // 文件存在，创建备份
+        const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD格式
+        const backupFileName = `${finalFileName}.bak.${currentDate}`;
+        const backupPath = `${targetPath}/${backupFileName}`;
+        
+        await this.executeCommand(
+          conn,
+          `mv "${remoteJarPath}" "${backupPath}"`,
+          logCallback
+        );
+        
+        if (logCallback) {
+          logCallback(`已备份原文件为: ${backupFileName}`);
+        }
+      } catch (err) {
+        // 文件不存在，无需备份
+        if (logCallback) {
+          logCallback(`目标文件不存在，无需备份`);
+        }
+      }
+      
+      // 5. 上传JAR文件
       await this.uploadFile(
         conn, 
         localJarPath, 
@@ -167,7 +197,7 @@ class SSHService {
         logCallback
       );
       
-      // 5. 执行重启脚本（如果提供）
+      // 6. 执行重启脚本（如果提供）
       if (restartScript) {
         await this.executeCommand(
           conn, 
@@ -178,7 +208,7 @@ class SSHService {
         // 默认重启命令（简单示例）
         await this.executeCommand(
           conn, 
-          `cd ${targetPath} && nohup java -jar ${jarFileName} > app.log 2>&1 &`, 
+          `cd ${targetPath} && nohup java -jar ${finalFileName} > app.log 2>&1 &`, 
           logCallback
         );
       }

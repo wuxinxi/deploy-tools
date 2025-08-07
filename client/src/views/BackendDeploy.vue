@@ -48,6 +48,16 @@
           </el-upload>
         </el-form-item>
         
+        <el-form-item label="服务器文件名" prop="serverFileName">
+          <el-input 
+            v-model="deployForm.serverFileName" 
+            placeholder="服务器上的文件名"
+          ></el-input>
+          <div class="form-hint">
+            如果服务器上已存在同名文件，将自动备份为 .bak.当前日期 格式
+          </div>
+        </el-form-item>
+        
         <el-form-item label="部署路径" prop="targetPath">
           <el-input 
             v-model="deployForm.targetPath" 
@@ -93,11 +103,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { getServers } from '../api/server'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { onMounted, reactive, ref } from 'vue'
 import { deployBackendApi } from '../api/deploy'
 import { getLogDetail } from '../api/log'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { getServers } from '../api/server'
 
 // 状态变量
 const servers = ref([])
@@ -113,7 +123,8 @@ const deployForm = reactive({
   serverId: '',
   jarFile: null,
   targetPath: '',
-  restartScript: ''
+  restartScript: '',
+  serverFileName: '' // 新增服务器文件名
 })
 
 // 表单验证规则
@@ -131,6 +142,9 @@ const formRules = reactive({
   restartScript: [
     { required: true, message: '请输入重启脚本路径', trigger: 'blur' },
     { pattern: /^\/.*/, message: '请输入绝对路径', trigger: 'blur' }
+  ],
+  serverFileName: [ // 新增服务器文件名验证规则
+    { required: true, message: '请输入服务器文件名', trigger: 'blur' }
   ]
 })
 
@@ -160,6 +174,11 @@ const handleFileChange = (file, fileList) => {
     fileList.splice(0, fileList.length - 1)
   }
   deployForm.jarFile = file.raw
+  
+  // 自动设置服务器文件名为当前文件名
+  if (file.raw && file.raw.name) {
+    deployForm.serverFileName = file.raw.name
+  }
 }
 
 // 提交部署
@@ -170,7 +189,7 @@ const submitDeploy = async () => {
     
     // 确认部署
     await ElMessageBox.confirm(
-      `确定要将应用部署到所选服务器吗？\n服务器: ${getServerName(deployForm.serverId)}\n路径: ${deployForm.targetPath}\n脚本: ${deployForm.restartScript}`,
+      `确定要将应用部署到所选服务器吗？\n服务器: ${getServerName(deployForm.serverId)}\n文件名: ${deployForm.serverFileName}\n路径: ${deployForm.targetPath}\n脚本: ${deployForm.restartScript}`,
       '确认部署',
       {
         confirmButtonText: '确定',
@@ -185,6 +204,7 @@ const submitDeploy = async () => {
     formData.append('targetPath', deployForm.targetPath)
     formData.append('restartScript', deployForm.restartScript)
     formData.append('jarFile', deployForm.jarFile)
+    formData.append('serverFileName', deployForm.serverFileName) // 添加服务器文件名
     
     // 开始部署
     deploying.value = true
@@ -217,6 +237,7 @@ const resetForm = () => {
   }
   fileList.value = []
   deployForm.jarFile = null
+  deployForm.serverFileName = '' // 重置服务器文件名
   deployLog.value = ''
   logId.value = null
 }
