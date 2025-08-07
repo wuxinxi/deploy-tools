@@ -3,106 +3,169 @@
     <el-card class="welcome-card">
       <div class="welcome-content">
         <h1>欢迎使用运维自动化部署工具</h1>
-        <p class="description">
-          该工具可以帮助您快速部署前端和后端应用，简化运维流程，提高工作效率
-        </p>
-        <div class="action-buttons">
-          <el-button
-            type="primary"
-            size="large"
-            @click="$router.push('/servers')"
-            icon="Server"
-          >
-            服务器管理
-          </el-button>
-          <el-button
-            type="success"
-            size="large"
-            @click="$router.push('/deploy/backend')"
-            icon="HardDrive"
-          >
-            部署后端应用
-          </el-button>
-          <el-button
-            type="info"
-            size="large"
-            @click="$router.push('/deploy/frontend')"
-            icon="Monitor"
-          >
-            部署前端应用
-          </el-button>
+        <p>高效、安全地部署您的应用程序</p>
+
+        <div class="stats-grid">
+          <el-card class="stat-card">
+            <div class="stat-icon">
+              <el-icon><Connection /></el-icon>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value">{{ serverCount }}</div>
+              <div class="stat-label">已管理服务器</div>
+            </div>
+          </el-card>
+
+          <el-card class="stat-card">
+            <div class="stat-icon">
+              <el-icon><Monitor /></el-icon>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value">{{ deployCountToday }}</div>
+              <div class="stat-label">今日部署次数</div>
+            </div>
+          </el-card>
+
+          <el-card class="stat-card">
+            <div class="stat-icon">
+              <el-icon><CircleCheck /></el-icon>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value">{{ successRate }}%</div>
+              <div class="stat-label">部署成功率</div>
+            </div>
+          </el-card>
         </div>
       </div>
     </el-card>
 
-    <div class="stats-grid">
-      <el-card class="stat-card">
-        <div class="stat-content">
-          <el-icon class="stat-icon"><Operation /></el-icon>
-          <div class="stat-info">
-            <div class="stat-label">已配置服务器</div>
-            <div class="stat-value">{{ serverCount }}</div>
-          </div>
+    <div class="recent-activity">
+      <el-card>
+        <div class="card-header">
+          <h2>最近部署活动</h2>
         </div>
-      </el-card>
 
-      <el-card class="stat-card">
-        <div class="stat-content">
-          <el-icon class="stat-icon"><CircleCheck /></el-icon>
-          <div class="stat-info">
-            <div class="stat-label">成功部署</div>
-            <div class="stat-value">{{ successCount }}</div>
-          </div>
-        </div>
-      </el-card>
-
-      <el-card class="stat-card">
-        <div class="stat-content">
-          <el-icon class="stat-icon"><Clock /></el-icon>
-          <div class="stat-info">
-            <div class="stat-label">最近部署</div>
-            <div class="stat-value">{{ lastDeploy || '暂无' }}</div>
-          </div>
-        </div>
+        <el-table
+          :data="recentDeployments"
+          border
+          style="width: 100%"
+        >
+          <el-table-column
+            prop="time"
+            label="时间"
+            width="180"
+          ></el-table-column>
+          <el-table-column
+            prop="serverName"
+            label="服务器"
+            width="180"
+          ></el-table-column>
+          <el-table-column
+            prop="type"
+            label="类型"
+            width="100"
+          >
+            <template #default="scope">
+              <el-tag
+                :type="scope.row.type === 'backend' ? 'primary' : 'success'"
+              >
+                {{ scope.row.type === 'backend' ? '后端' : '前端' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="status"
+            label="状态"
+            width="100"
+          >
+            <template #default="scope">
+              <el-tag
+                :type="scope.row.status === 'success' ? 'success' : 'danger'"
+              >
+                {{ scope.row.status === 'success' ? '成功' : '失败' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="message"
+            label="详情"
+          ></el-table-column>
+          <el-table-column
+            label="操作"
+            width="100"
+          >
+            <template #default="scope">
+              <el-button
+                size="small"
+                type="text"
+                @click="viewDeploymentDetail(scope.row.id)"
+              >
+                详情
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
       </el-card>
     </div>
   </div>
 </template>
 
 <script setup>
-import { CircleCheck, Clock } from '@element-plus/icons-vue'
+import { CircleCheck } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import { onMounted, ref } from 'vue'
-import { getLogs } from '../api/log'
-import { getServers } from '../api/server'
+import { useRouter } from 'vue-router'
+import { getDashboardStats, getRecentDeployments } from '../api/dashboard'
 
+// 状态变量
 const serverCount = ref(0)
-const successCount = ref(0)
-const lastDeploy = ref('')
+const deployCountToday = ref(0)
+const successRate = ref(0)
+const recentDeployments = ref([])
+const loading = ref(true)
 
+const router = useRouter()
+
+// 获取仪表盘统计数据
+const fetchDashboardStats = async () => {
+  try {
+    const res = await getDashboardStats()
+    if (res.success) {
+      serverCount.value = res.data.serverCount
+      deployCountToday.value = res.data.deployCountToday
+      successRate.value = res.data.successRate
+    }
+  } catch (err) {
+    console.error('获取仪表盘统计数据失败:', err)
+    ElMessage.error('获取统计数据失败: ' + (err.message || '未知错误'))
+  }
+}
+
+// 获取最近部署记录
+const fetchRecentDeployments = async () => {
+  try {
+    const res = await getRecentDeployments()
+    if (res.success) {
+      recentDeployments.value = res.data
+    }
+  } catch (err) {
+    console.error('获取最近部署记录失败:', err)
+    ElMessage.error('获取部署记录失败: ' + (err.message || '未知错误'))
+  }
+}
+
+// 查看部署详情
+const viewDeploymentDetail = (logId) => {
+  router.push({ path: '/logs', query: { logId } })
+}
+
+// 页面加载时获取数据
 onMounted(async () => {
   try {
-    // 获取服务器数量
-    const serverRes = await getServers()
-    serverCount.value = serverRes.data.length
-
-    // 获取部署统计
-    const logRes = await getLogs({
-      type: ['backend_deploy', 'frontend_deploy'],
-      limit: 10,
-    })
-
-    // 计算成功部署数量
-    successCount.value = logRes.data.filter(
-      (log) => log.status === 'success'
-    ).length
-
-    // 获取最近部署时间
-    if (logRes.data.length > 0) {
-      const latestLog = logRes.data[0]
-      lastDeploy.value = new Date(latestLog.createdAt).toLocaleString()
-    }
-  } catch (error) {
-    console.error('获取统计数据失败:', error)
+    loading.value = true
+    await Promise.all([fetchDashboardStats(), fetchRecentDeployments()])
+  } finally {
+    loading.value = false
   }
 })
 </script>
@@ -118,65 +181,58 @@ onMounted(async () => {
 
 .welcome-content {
   text-align: center;
-  padding: 40px 20px;
+  padding: 30px 0;
 }
 
 .welcome-content h1 {
+  margin: 0 0 15px 0;
   font-size: 28px;
-  margin-bottom: 16px;
-  color: #1f2329;
+  font-weight: 600;
 }
 
-.description {
+.welcome-content p {
+  margin: 0 0 30px 0;
   font-size: 16px;
-  color: #6b7280;
-  max-width: 800px;
-  margin: 0 auto 30px;
-  line-height: 1.6;
-}
-
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  color: #666;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
+  padding: 0 20px;
 }
 
 .stat-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-
-.stat-content {
   display: flex;
   align-items: center;
   padding: 20px;
 }
 
 .stat-icon {
-  font-size: 32px;
-  margin-right: 16px;
+  font-size: 36px;
+  margin-right: 20px;
   color: #409eff;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: #6b7280;
 }
 
 .stat-value {
   font-size: 24px;
-  font-weight: bold;
-  color: #1f2329;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  color: #666;
+  font-size: 14px;
+}
+
+.card-header {
+  margin-bottom: 15px;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
 }
 </style>

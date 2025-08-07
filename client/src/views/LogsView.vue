@@ -3,9 +3,9 @@
     <el-card>
       <div class="card-header">
         <h2>部署日志</h2>
-        <el-button
-          type="danger"
-          text
+        <el-button 
+          type="danger" 
+          text 
           @click="handleClearLogs"
           :disabled="loading"
         >
@@ -13,140 +13,126 @@
           清空日志
         </el-button>
       </div>
-
+      
       <div class="filter-bar">
-        <el-select
-          v-model="filter.serverId"
+        <el-select 
+          v-model="filter.serverId" 
           placeholder="选择服务器"
           clearable
-          style="width: 200px; margin-right: 10px"
+          style="width: 200px; margin-right: 10px;"
           @change="fetchLogs"
         >
-          <el-option
-            v-for="server in servers"
+          <el-option 
+            v-for="server in servers" 
             :key="server.id"
             :label="server.name"
             :value="server.id"
           ></el-option>
         </el-select>
-
-        <el-select
-          v-model="filter.type"
+        
+        <el-select 
+          v-model="filter.type" 
           placeholder="日志类型"
           clearable
-          style="width: 160px; margin-right: 10px"
+          style="width: 160px; margin-right: 10px;"
           @change="fetchLogs"
         >
-          <el-option
-            label="连接测试"
-            value="connection_test"
-          ></el-option>
-          <el-option
-            label="后端部署"
-            value="backend_deploy"
-          ></el-option>
-          <el-option
-            label="前端部署"
-            value="frontend_deploy"
-          ></el-option>
+          <el-option label="连接测试" value="connection_test"></el-option>
+          <el-option label="后端部署" value="backend_deploy"></el-option>
+          <el-option label="前端部署" value="frontend_deploy"></el-option>
         </el-select>
-
-        <el-select
-          v-model="filter.status"
+        
+        <el-select 
+          v-model="filter.status" 
           placeholder="状态"
           clearable
-          style="width: 120px; margin-right: 10px"
+          style="width: 120px; margin-right: 10px;"
           @change="fetchLogs"
         >
-          <el-option
-            label="成功"
-            value="success"
-          ></el-option>
-          <el-option
-            label="失败"
-            value="error"
-          ></el-option>
-          <el-option
-            label="进行中"
-            value="pending"
-          ></el-option>
+          <el-option label="成功" value="success"></el-option>
+          <el-option label="失败" value="error"></el-option>
+          <el-option label="进行中" value="pending"></el-option>
         </el-select>
-
-        <el-input
-          v-model="filter.keyword"
+        
+        <el-input 
+          v-model="filter.keyword" 
           placeholder="搜索日志内容"
-          style="width: 250px"
+          style="width: 250px;"
           clearable
           @keyup.enter="fetchLogs"
         >
           <template #append>
-            <el-button
-              icon="Search"
+            <el-button 
+              icon="Search" 
               size="small"
               @click="fetchLogs"
             ></el-button>
           </template>
         </el-input>
       </div>
-
-      <el-table
-        :data="logs"
-        border
-        style="width: 100%; margin-top: 15px"
+      
+      <el-table 
+        :data="logs" 
+        border 
+        style="width: 100%; margin-top: 15px;"
         v-loading="loading"
       >
-        <el-table-column
-          prop="id"
-          label="ID"
+        <el-table-column 
+          prop="id" 
+          label="ID" 
           width="80"
         ></el-table-column>
-        <el-table-column
-          prop="serverName"
-          label="服务器"
+        <el-table-column 
+          prop="serverName" 
+          label="服务器" 
           width="150"
         ></el-table-column>
-        <el-table-column
-          prop="type"
-          label="类型"
+        <el-table-column 
+          prop="type" 
+          label="类型" 
           width="120"
         >
           <template #default="scope">
-            <el-tag :type="typeTagType[scope.row.type]">
+            <el-tag 
+              :type="typeTagType[scope.row.type]"
+            >
               {{ typeTextMap[scope.row.type] }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="status"
-          label="状态"
+        <el-table-column 
+          prop="status" 
+          label="状态" 
           width="100"
         >
           <template #default="scope">
-            <el-tag :type="statusTagType[scope.row.status]">
+            <el-tag 
+              :type="statusTagType[scope.row.status]"
+            >
               {{ statusTextMap[scope.row.status] }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="createdAt"
-          label="创建时间"
+        <el-table-column 
+          prop="createdAt" 
+          label="创建时间" 
           width="180"
         ></el-table-column>
-        <el-table-column
-          label="操作"
+        <el-table-column 
+          label="操作" 
           width="120"
         >
           <template #default="scope">
-            <el-button
-              size="small"
-              type="text"
+            <el-button 
+              size="small" 
+              type="text" 
               @click="viewLogDetail(scope.row.id)"
             >
               查看详情
             </el-button>
-            <el-button
-              size="small"
-              type="text"
+            <el-button 
+              size="small" 
+              type="text" 
               text-color="#ff4d4f"
               @click="handleDeleteLog(scope.row.id)"
             >
@@ -155,7 +141,7 @@
           </template>
         </el-table-column>
       </el-table>
-
+      
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -164,24 +150,20 @@
         :page-size="pagination.limit"
         layout="total, sizes, prev, pager, next, jumper"
         :total="pagination.total"
-        style="margin-top: 15px; text-align: right"
+        style="margin-top: 15px; text-align: right;"
       ></el-pagination>
     </el-card>
-
+    
     <!-- 日志详情对话框 -->
-    <el-dialog
-      v-model="detailVisible"
+    <el-dialog 
+      v-model="detailVisible" 
       title="日志详情"
       width="800px"
       :before-close="handleDetailClose"
     >
-      <pre
-        class="log-detail-content"
-        v-if="currentLog"
-        >{{ currentLog.message }}</pre
-      >
+      <pre class="log-detail-content" v-if="currentLog">{{ currentLog.message }}</pre>
       <div v-else>加载中...</div>
-
+      
       <template #footer>
         <el-button @click="detailVisible = false">关闭</el-button>
       </template>
@@ -190,11 +172,11 @@
 </template>
 
 <script setup>
-import { Delete } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox, ElTag } from 'element-plus'
-import { onMounted, reactive, ref } from 'vue'
-import { clearLogs, deleteLog, getLogDetail, getLogs } from '../api/log'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { getLogs, getLogDetail, deleteLog, clearLogs } from '../api/log'
 import { getServers } from '../api/server'
+import { Delete, Search } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox, ElTag } from 'element-plus'
 
 // 状态变量
 const logs = ref([])
@@ -207,7 +189,7 @@ const currentLog = ref(null)
 const pagination = ref({
   page: 1,
   limit: 10,
-  total: 0,
+  total: 0
 })
 
 // 过滤条件
@@ -215,35 +197,35 @@ const filter = reactive({
   serverId: '',
   type: '',
   status: '',
-  keyword: '',
+  keyword: ''
 })
 
 // 日志类型文本映射
 const typeTextMap = {
-  connection_test: '连接测试',
-  backend_deploy: '后端部署',
-  frontend_deploy: '前端部署',
+  'connection_test': '连接测试',
+  'backend_deploy': '后端部署',
+  'frontend_deploy': '前端部署'
 }
 
 // 日志类型标签样式映射
 const typeTagType = {
-  connection_test: 'info',
-  backend_deploy: 'primary',
-  frontend_deploy: 'success',
+  'connection_test': 'info',
+  'backend_deploy': 'primary',
+  'frontend_deploy': 'success'
 }
 
 // 状态文本映射
 const statusTextMap = {
-  pending: '进行中',
-  success: '成功',
-  error: '失败',
+  'pending': '进行中',
+  'success': '成功',
+  'error': '失败'
 }
 
 // 状态标签样式映射
 const statusTagType = {
-  pending: 'warning',
-  success: 'success',
-  error: 'danger',
+  'pending': 'warning',
+  'success': 'success',
+  'error': 'danger'
 }
 
 // 获取服务器列表（用于筛选）
@@ -266,9 +248,9 @@ const fetchLogs = async () => {
     const res = await getLogs({
       ...filter,
       page: pagination.value.page,
-      limit: pagination.value.limit,
+      limit: pagination.value.limit
     })
-
+    
     if (res.success) {
       logs.value = res.data
       pagination.value.total = res.pagination.total
@@ -286,7 +268,7 @@ const viewLogDetail = async (logId) => {
   try {
     loading.value = true
     const res = await getLogDetail(logId)
-
+    
     if (res.success) {
       currentLog.value = res.data
       detailVisible.value = true
@@ -308,12 +290,16 @@ const handleDetailClose = () => {
 // 删除单个日志
 const handleDeleteLog = async (logId) => {
   try {
-    await ElMessageBox.confirm('确定要删除这条日志吗？', '确认删除', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    })
-
+    await ElMessageBox.confirm(
+      '确定要删除这条日志吗？',
+      '确认删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
     const res = await deleteLog(logId)
     if (res.success) {
       ElMessage.success('日志删除成功')
@@ -335,15 +321,15 @@ const handleClearLogs = async () => {
       {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: 'danger',
+        type: 'danger'
       }
     )
-
+    
     // 构建清空日志的过滤条件
     const clearFilter = {}
     if (filter.serverId) clearFilter.serverId = filter.serverId
     if (filter.type) clearFilter.type = filter.type
-
+    
     const res = await clearLogs(clearFilter)
     if (res.success) {
       ElMessage.success('日志清空成功')

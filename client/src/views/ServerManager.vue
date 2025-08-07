@@ -196,7 +196,8 @@
 </template>
 
 <script setup>
-import { Hide } from '@element-plus/icons-vue'
+import { Hide, View } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { computed, onMounted, reactive, ref } from 'vue'
 import {
   addServer,

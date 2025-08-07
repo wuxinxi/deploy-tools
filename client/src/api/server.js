@@ -1,31 +1,56 @@
-import axios from './axios'
+import request from './axios'
 
-// 获取服务器列表
+/**
+ * 获取服务器列表
+ * @param {Object} params - 包含分页参数的对象
+ * @returns {Promise}
+ */
 export const getServers = (params) => {
-  return axios.get('/servers', { params })
+  return request.get('/servers', { params })
 }
 
-// 获取单个服务器
-export const getServer = (id) => {
-  return axios.get(`/servers/${id}`)
+/**
+ * 获取单个服务器详情
+ * @param {string} id - 服务器ID
+ * @returns {Promise}
+ */
+export const getServerDetail = (id) => {
+  return request.get(`/servers/${id}`)
 }
 
-// 添加服务器
+/**
+ * 添加服务器
+ * @param {Object} data - 服务器信息
+ * @returns {Promise}
+ */
 export const addServer = (data) => {
-  return axios.post('/servers', data)
+  return request.post('/servers', data)
 }
 
-// 更新服务器
+/**
+ * 更新服务器
+ * @param {string} id - 服务器ID
+ * @param {Object} data - 更新的服务器信息
+ * @returns {Promise}
+ */
 export const updateServer = (id, data) => {
-  return axios.put(`/servers/${id}`, data)
+  return request.put(`/servers/${id}`, data)
 }
 
-// 删除服务器
+/**
+ * 删除服务器
+ * @param {string} id - 服务器ID
+ * @returns {Promise}
+ */
 export const deleteServer = (id) => {
-  return axios.delete(`/servers/${id}`)
+  return request.delete(`/servers/${id}`)
 }
 
-// 测试服务器连接
+/**
+ * 测试服务器连接
+ * @param {string} id - 服务器ID
+ * @returns {Promise}
+ */
 export const testServerConnection = (id) => {
-  return axios.post('/servers/test-connection', { serverId: id })
+  return request.post(`/servers/${id}/test-connection`)
 }

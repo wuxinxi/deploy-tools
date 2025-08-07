@@ -19,12 +19,12 @@
             <span>首页</span>
           </el-menu-item>
           <el-menu-item index="servers">
-            <el-icon><Operation /></el-icon>
+            <el-icon><Connection /></el-icon>
             <span>服务器管理</span>
           </el-menu-item>
           <el-sub-menu index="deploy">
             <template #title>
-              <el-icon><Cpu /></el-icon>
+              <el-icon><Monitor /></el-icon>
               <span>应用部署</span>
             </template>
             <el-menu-item index="deploy-backend">后端部署</el-menu-item>
@@ -74,10 +74,11 @@
 <script setup>
 import {
   ArrowDown,
+  Connection,
   Cpu,
   Document,
   House,
-  Operation,
+  Monitor,
   User,
 } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'

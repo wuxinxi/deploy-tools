@@ -1,99 +1,64 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const bodyParser = require('body-parser');
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
+const express = require('express')
+const cors = require('cors')
+const bodyParser = require('body-parser')
+const path = require('path')
+const fs = require('fs')
 
-// 初始化数据库连接
-async function initDb() {
-  const db = await open({
-    filename: path.join(__dirname, 'database.db'),
-    driver: sqlite3.Database
-  });
-  
-  // 创建服务器表
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS servers (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      ip TEXT NOT NULL,
-      port INTEGER NOT NULL DEFAULT 22,
-      username TEXT NOT NULL,
-      password TEXT,
-      privateKey TEXT,
-      description TEXT,
-      createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-  
-  // 创建部署日志表
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS logs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      type TEXT NOT NULL,
-      serverId INTEGER,
-      message TEXT,
-      status TEXT NOT NULL DEFAULT 'pending',
-      createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      completedAt TIMESTAMP,
-      FOREIGN KEY (serverId) REFERENCES servers(id)
-    )
-  `);
-  
-  return db;
+// 初始化Express应用
+const app = express()
+const PORT = process.env.PORT || 3000
+
+// 创建必要的目录
+const uploadDir = path.join(__dirname, 'uploads')
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir)
 }
-
-// 全局数据库连接
-let db;
-initDb().then(database => {
-  db = database;
-  console.log('数据库初始化成功');
-}).catch(err => {
-  console.error('数据库初始化失败:', err);
-  process.exit(1);
-});
-
-// 创建Express应用
-const app = express();
-const PORT = process.env.PORT || 3000;
 
 // 中间件
-app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors()) // 允许跨域请求
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(express.static(path.join(__dirname, 'public')))
 
-// 确保uploads目录存在
-const uploadsDir = path.join(__dirname, 'uploads');
-const fs = require('fs');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
+// 路由 - 注意这里添加了/api前缀
+const serverRoutes = require('./routes/serverRoutes')
+const deployRoutes = require('./routes/deployRoutes')
+const logRoutes = require('./routes/logRoutes')
+const dashboardRoutes = require('./routes/dashboardRoutes')
 
-// 路由
-app.use('/api/servers', require('./routes/serverRoutes')(db));
-app.use('/api/deploy', require('./routes/deployRoutes')(db));
-app.use('/api/logs', require('./routes/logRoutes')(db));
+// 所有API路由都添加/api前缀
+app.use('/api/servers', serverRoutes)
+app.use('/api/deploy', deployRoutes)
+app.use('/api/logs', logRoutes)
+app.use('/api/dashboard', dashboardRoutes)
 
-// 静态文件服务
-app.use(express.static(path.join(__dirname, 'public')));
+// 根路由
+app.get('/', (req, res) => {
+  res.send('运维自动化部署工具API服务')
+})
+
+// 404处理
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `API地址不存在: ${req.method} ${req.originalUrl}`,
+  })
+})
 
 // 错误处理中间件
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error(err.stack)
   res.status(500).json({
     success: false,
     message: '服务器内部错误',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
-});
+    error: err.message,
+  })
+})
 
 // 启动服务器
 app.listen(PORT, () => {
-  console.log(`服务器运行在 http://localhost:${PORT}`);
-});
+  console.log(`服务器运行在 http://localhost:${PORT}`)
+  console.log(`API基础路径: http://localhost:${PORT}/api`)
+})
 
-// 导出数据库连接供其他模块使用
-module.exports = { db };
+module.exports = app

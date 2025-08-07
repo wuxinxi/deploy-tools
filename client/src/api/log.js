@@ -1,21 +1,37 @@
-import axios from './axios'
+import request from './axios';
 
-// 获取日志列表
+/**
+ * 获取日志列表
+ * @param {Object} params - 包含筛选和分页参数的对象
+ * @returns {Promise}
+ */
 export const getLogs = (params) => {
-  return axios.get('/logs', { params })
-}
+  return request.get('/logs', { params });
+};
 
-// 获取日志详情
+/**
+ * 获取单个日志详情
+ * @param {string} id - 日志ID
+ * @returns {Promise}
+ */
 export const getLogDetail = (id) => {
-  return axios.get(`/logs/${id}`)
-}
+  return request.get(`/logs/${id}`);
+};
 
-// 删除日志
+/**
+ * 删除单个日志
+ * @param {string} id - 日志ID
+ * @returns {Promise}
+ */
 export const deleteLog = (id) => {
-  return axios.delete(`/logs/${id}`)
-}
+  return request.delete(`/logs/${id}`);
+};
 
-// 清空日志
+/**
+ * 清空日志
+ * @param {Object} params - 包含筛选条件的对象
+ * @returns {Promise}
+ */
 export const clearLogs = (params) => {
-  return axios.delete('/logs', { params })
-}
+  return request.delete('/logs', { params });
+};
