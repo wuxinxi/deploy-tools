@@ -3,158 +3,119 @@
     <el-card>
       <div class="card-header">
         <h2>服务器管理</h2>
-        <el-button
-          type="primary"
-          icon="Plus"
-          @click="openServerForm()"
-        >
+        <el-button type="primary" icon="Plus" @click="openServerForm()">
           添加服务器
         </el-button>
       </div>
 
-      <el-table
-        :data="servers"
-        border
-        style="width: 100%"
-      >
-        <el-table-column
-          prop="name"
-          label="服务器名称"
-        ></el-table-column>
-        <el-table-column
-          prop="ip"
-          label="IP地址"
-        ></el-table-column>
-        <el-table-column
-          prop="port"
-          label="SSH端口"
-        ></el-table-column>
-        <el-table-column
-          prop="username"
-          label="用户名"
-        ></el-table-column>
-        <el-table-column
-          prop="createdAt"
-          label="创建时间"
-        ></el-table-column>
-        <el-table-column label="连接状态">
+      <el-table :data="servers" border style="width: 100%">
+        <el-table-column prop="name" label="服务器名称"></el-table-column>
+        <el-table-column prop="ip" label="IP地址"></el-table-column>
+        <el-table-column prop="port" label="SSH端口" width="90"></el-table-column>
+        <el-table-column prop="username" label="用户名"></el-table-column>
+        <el-table-column label="SSH连接">
           <template #default="scope">
-            <el-tag
-              :type="
-                scope.row.connectionStatus === 'connected'
-                  ? 'success'
-                  : 'warning'
-              "
-            >
+            <el-tag :type="scope.row.sshStatus === 'success'
+              ? 'success'
+              : scope.row.sshStatus === 'failed'
+                ? 'danger'
+                : 'warning'
+              ">
               {{
-                scope.row.connectionStatus === 'connected' ? '已连接' : '未测试'
+                scope.row.sshStatus === 'success'
+                  ? 'SSH正常'
+                  : scope.row.sshStatus === 'failed'
+                    ? 'SSH失败'
+                    : '未测试'
               }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column
-          label="操作"
-          width="320"
-        >
+        <el-table-column label="Java状态">
           <template #default="scope">
-            <el-button
-              size="small"
-              type="text"
-              @click="testConnection(scope.row.id)"
-              :loading="testingConnections.includes(scope.row.id)"
-            >
-              测试连接
+            <el-tag :type="scope.row.javaStatus === 'success'
+              ? 'success'
+              : scope.row.javaStatus === 'failed'
+                ? 'danger'
+                : 'warning'
+              ">
+              {{
+                scope.row.javaStatus === 'success'
+                  ? 'Java正常'
+                  : scope.row.javaStatus === 'failed'
+                    ? 'Java失败'
+                    : '未测试'
+              }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="Nginx状态">
+          <template #default="scope">
+            <el-tag :type="scope.row.nginxStatus === 'success'
+              ? 'success'
+              : scope.row.nginxStatus === 'failed'
+                ? 'danger'
+                : 'warning'
+              ">
+              {{
+                scope.row.nginxStatus === 'success'
+                  ? 'Nginx正常'
+                  : scope.row.nginxStatus === 'failed'
+                    ? 'Nginx失败'
+                    : '未测试'
+              }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createdAt" label="创建时间" width="180">
+        </el-table-column>
+        <el-table-column label="操作" width="460">
+          <template #default="scope">
+            <el-button size="small" type="text" @click="testSSH(scope.row.id)"
+              :loading="testingSSH.includes(scope.row.id)">
+              测试SSH
             </el-button>
-            <el-button
-              size="small"
-              type="text"
-              @click="openServerForm(scope.row)"
-            >
+            <el-button size="small" type="text" @click="testJava(scope.row.id)"
+              :loading="testingJava.includes(scope.row.id)" :disabled="!scope.row.javaPath">
+              测试Java
+            </el-button>
+            <el-button size="small" type="text" @click="testNginx(scope.row.id)"
+              :loading="testingNginx.includes(scope.row.id)" :disabled="!scope.row.nginxPath">
+              测试Nginx
+            </el-button>
+            <el-button size="small" type="text" @click="openServerForm(scope.row)">
               编辑
             </el-button>
-            <el-button
-              size="small"
-              type="text"
-              text-color="#ff4d4f"
-              @click="handleDeleteServer(scope.row.id)"
-            >
+            <el-button size="small" type="text" text-color="#ff4d4f" @click="handleDeleteServer(scope.row.id)">
               删除
             </el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="pagination.page"
-        :page-sizes="[10, 20, 50]"
-        :page-size="pagination.limit"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="pagination.total"
-        style="margin-top: 15px; text-align: right"
-      ></el-pagination>
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+        :current-page="pagination.page" :page-sizes="[10, 20, 50]" :page-size="pagination.limit"
+        layout="total, sizes, prev, pager, next, jumper" :total="pagination.total"
+        style="margin-top: 15px; text-align: right"></el-pagination>
     </el-card>
 
     <!-- 服务器表单对话框 -->
-    <el-dialog
-      v-model="dialogVisible"
-      :title="formTitle"
-      width="500px"
-    >
-      <el-form
-        :model="serverForm"
-        ref="serverFormRef"
-        :rules="formRules"
-        label-width="100px"
-        style="margin-top: 20px"
-      >
-        <el-form-item
-          label="服务器名称"
-          prop="name"
-        >
-          <el-input
-            v-model="serverForm.name"
-            placeholder="请输入服务器名称"
-          ></el-input>
+    <el-dialog v-model="dialogVisible" :title="formTitle" width="500px">
+      <el-form :model="serverForm" ref="serverFormRef" :rules="formRules" label-width="100px" style="margin-top: 20px">
+        <el-form-item label="服务器名称" prop="name">
+          <el-input v-model="serverForm.name" placeholder="请输入服务器名称"></el-input>
         </el-form-item>
-        <el-form-item
-          label="IP地址"
-          prop="ip"
-        >
-          <el-input
-            v-model="serverForm.ip"
-            placeholder="请输入服务器IP地址"
-          ></el-input>
+        <el-form-item label="IP地址" prop="ip">
+          <el-input v-model="serverForm.ip" placeholder="请输入服务器IP地址"></el-input>
         </el-form-item>
-        <el-form-item
-          label="SSH端口"
-          prop="port"
-        >
-          <el-input
-            v-model="serverForm.port"
-            type="number"
-            placeholder="请输入SSH端口，默认22"
-          ></el-input>
+        <el-form-item label="SSH端口" prop="port">
+          <el-input v-model="serverForm.port" type="number" placeholder="请输入SSH端口，默认22"></el-input>
         </el-form-item>
-        <el-form-item
-          label="用户名"
-          prop="username"
-        >
-          <el-input
-            v-model="serverForm.username"
-            placeholder="请输入登录用户名"
-          ></el-input>
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="serverForm.username" placeholder="请输入登录用户名"></el-input>
         </el-form-item>
-        <el-form-item
-          label="密码/密钥"
-          prop="password"
-        >
-          <el-input
-            v-model="serverForm.password"
-            :type="showPassword ? 'text' : 'password'"
-            placeholder="请输入密码或私钥"
-          >
+        <el-form-item label="密码/密钥" prop="password">
+          <el-input v-model="serverForm.password" :type="showPassword ? 'text' : 'password'" placeholder="请输入密码或私钥">
             <template #suffix>
               <el-icon @click="showPassword = !showPassword">
                 <Hide v-if="showPassword" />
@@ -163,23 +124,24 @@
             </template>
           </el-input>
         </el-form-item>
+        <el-form-item label="Java路径">
+          <el-input v-model="serverForm.javaPath" placeholder="例如: /usr/bin/java"></el-input>
+          <div class="form-hint">Java可执行文件的全路径</div>
+        </el-form-item>
+
+        <el-form-item label="Nginx路径">
+          <el-input v-model="serverForm.nginxPath" placeholder="例如: /usr/sbin/nginx"></el-input>
+          <div class="form-hint">Nginx可执行文件的全路径</div>
+        </el-form-item>
+
         <el-form-item label="备注">
-          <el-input
-            v-model="serverForm.remark"
-            placeholder="请输入备注信息"
-            type="textarea"
-            rows="3"
-          ></el-input>
+          <el-input v-model="serverForm.remark" placeholder="请输入备注信息" type="textarea" rows="3"></el-input>
         </el-form-item>
       </el-form>
 
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button
-          type="primary"
-          @click="submitServerForm"
-          :loading="formLoading"
-        >
+        <el-button type="primary" @click="submitServerForm" :loading="formLoading">
           确定
         </el-button>
       </template>
@@ -195,7 +157,9 @@ import {
   addServer,
   deleteServer,
   getServers,
-  testServerConnection,
+  testSSHConnection,
+  testJavaPath,
+  testNginxPath,
   updateServer,
 } from '../api/server'
 
@@ -205,7 +169,9 @@ const loading = ref(false)
 const formLoading = ref(false)
 const dialogVisible = ref(false)
 const showPassword = ref(false)
-const testingConnections = ref([])
+const testingSSH = ref([])
+const testingJava = ref([])
+const testingNginx = ref([])
 const serverFormRef = ref(null)
 
 // 分页信息
@@ -223,6 +189,8 @@ const serverForm = reactive({
   port: 22,
   username: '',
   password: '',
+  javaPath: '',
+  nginxPath: '',
   remark: '',
 })
 
@@ -271,7 +239,9 @@ const fetchServers = async () => {
     if (res.success) {
       servers.value = res.data.map((server) => ({
         ...server,
-        connectionStatus: 'untested', // 默认未测试状态
+        sshStatus: server.sshStatus || 'untested',
+        javaStatus: server.javaStatus || 'untested',
+        nginxStatus: server.nginxStatus || 'untested'
       }))
       pagination.value.total = res.pagination.total
     }
@@ -299,6 +269,8 @@ const openServerForm = (server = null) => {
       port: server.port,
       username: server.username,
       password: server.password,
+      javaPath: server.javaPath || '',
+      nginxPath: server.nginxPath || '',
       remark: server.remark || '',
     })
   } else {
@@ -310,6 +282,8 @@ const openServerForm = (server = null) => {
       port: 22,
       username: '',
       password: '',
+      javaPath: '',
+      nginxPath: '',
       remark: '',
     })
   }
@@ -351,31 +325,80 @@ const submitServerForm = async () => {
   }
 }
 
-// 测试服务器连接
-const testConnection = async (serverId) => {
+// 测试SSH连接
+const testSSH = async (serverId) => {
   try {
-    // 添加到正在测试的连接列表
-    testingConnections.value.push(serverId)
+    testingSSH.value.push(serverId);
+    const res = await testSSHConnection(serverId);
 
-    const res = await testServerConnection(serverId)
     if (res.success) {
-      // 更新服务器连接状态
-      const serverIndex = servers.value.findIndex((s) => s.id === serverId)
+      const serverIndex = servers.value.findIndex((s) => s.id === serverId);
       if (serverIndex !== -1) {
-        servers.value[serverIndex].connectionStatus = 'connected'
+        servers.value[serverIndex].sshStatus = 'success';
       }
-      ElMessage.success('连接测试成功')
+      ElMessage.success('SSH连接测试成功');
     }
   } catch (err) {
-    console.error('测试服务器连接失败:', err)
-    ElMessage.error('连接测试失败: ' + (err.message || '未知错误'))
+    console.error('测试SSH连接失败:', err);
+    const serverIndex = servers.value.findIndex((s) => s.id === serverId);
+    if (serverIndex !== -1) {
+      servers.value[serverIndex].sshStatus = 'failed';
+    }
+    ElMessage.error('SSH连接测试失败: ' + (err.message || '未知错误'));
   } finally {
-    // 从正在测试的连接列表中移除
-    testingConnections.value = testingConnections.value.filter(
-      (id) => id !== serverId
-    )
+    testingSSH.value = testingSSH.value.filter((id) => id !== serverId);
   }
-}
+};
+
+// 测试Java路径
+const testJava = async (serverId) => {
+  try {
+    testingJava.value.push(serverId);
+
+    const res = await testJavaPath(serverId);
+
+    if (res.success) {
+      const serverIndex = servers.value.findIndex((s) => s.id === serverId);
+      if (serverIndex !== -1) {
+        servers.value[serverIndex].javaStatus = res.valid ? 'success' : 'failed';
+      }
+      ElMessage.success(res.valid ? 'Java路径测试成功' : 'Java路径测试失败');
+    }
+  } catch (err) {
+    const serverIndex = servers.value.findIndex((s) => s.id === serverId);
+    if (serverIndex !== -1) {
+      servers.value[serverIndex].javaStatus = 'failed';
+    }
+    ElMessage.error('Java路径测试失败: ' + (err.message || '未知错误'));
+  } finally {
+    testingJava.value = testingJava.value.filter((id) => id !== serverId);
+  }
+};
+
+// 测试Nginx路径
+const testNginx = async (serverId) => {
+  try {
+    testingNginx.value.push(serverId);
+    const res = await testNginxPath(serverId);
+
+    if (res.success) {
+      const serverIndex = servers.value.findIndex((s) => s.id === serverId);
+      if (serverIndex !== -1) {
+        servers.value[serverIndex].nginxStatus = res.valid ? 'success' : 'failed';
+      }
+      ElMessage.success(res.valid ? 'Nginx路径测试成功' : 'Nginx路径测试失败');
+    }
+  } catch (err) {
+    console.error('测试Nginx路径失败:', err);
+    const serverIndex = servers.value.findIndex((s) => s.id === serverId);
+    if (serverIndex !== -1) {
+      servers.value[serverIndex].nginxStatus = 'failed';
+    }
+    ElMessage.error('Nginx路径测试失败: ' + (err.message || '未知错误'));
+  } finally {
+    testingNginx.value = testingNginx.value.filter((id) => id !== serverId);
+  }
+};
 
 // 删除服务器
 const handleDeleteServer = async (serverId) => {
@@ -432,5 +455,11 @@ onMounted(() => {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
+}
+
+.form-hint {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #666;
 }
 </style>

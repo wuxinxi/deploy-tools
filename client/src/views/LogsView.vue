@@ -3,175 +3,80 @@
     <el-card>
       <div class="card-header">
         <h2>部署日志</h2>
-        <el-button
-          type="danger"
-          text
-          @click="handleClearLogs"
-          :disabled="loading"
-        >
-          <el-icon><Delete /></el-icon>
+        <el-button type="danger" text @click="handleClearLogs" :disabled="loading">
+          <el-icon>
+            <Delete />
+          </el-icon>
           清空日志
         </el-button>
       </div>
 
       <div class="filter-bar">
-        <el-select
-          v-model="filter.serverId"
-          placeholder="选择服务器"
-          clearable
-          style="width: 200px; margin-right: 10px"
-          @change="fetchLogs"
-        >
-          <el-option
-            v-for="server in servers"
-            :key="server.id"
-            :label="server.name"
-            :value="server.id"
-          ></el-option>
+        <el-select v-model="filter.serverId" placeholder="选择服务器" clearable style="width: 200px; margin-right: 10px"
+          @change="fetchLogs">
+          <el-option v-for="server in servers" :key="server.id" :label="server.name" :value="server.id"></el-option>
         </el-select>
 
-        <el-select
-          v-model="filter.type"
-          placeholder="日志类型"
-          clearable
-          style="width: 160px; margin-right: 10px"
-          @change="fetchLogs"
-        >
-          <el-option
-            label="连接测试"
-            value="connection_test"
-          ></el-option>
-          <el-option
-            label="后端部署"
-            value="backend_deploy"
-          ></el-option>
-          <el-option
-            label="前端部署"
-            value="frontend_deploy"
-          ></el-option>
+        <el-select v-model="filter.type" placeholder="日志类型" clearable style="width: 160px; margin-right: 10px"
+          @change="fetchLogs">
+          <el-option label="连接测试" value="connection_test"></el-option>
+          <el-option label="后端部署" value="backend_deploy"></el-option>
+          <el-option label="前端部署" value="frontend_deploy"></el-option>
         </el-select>
 
-        <el-select
-          v-model="filter.status"
-          placeholder="状态"
-          clearable
-          style="width: 120px; margin-right: 10px"
-          @change="fetchLogs"
-        >
-          <el-option
-            label="成功"
-            value="success"
-          ></el-option>
-          <el-option
-            label="失败"
-            value="error"
-          ></el-option>
-          <el-option
-            label="进行中"
-            value="pending"
-          ></el-option>
+        <el-select v-model="filter.status" placeholder="状态" clearable style="width: 120px; margin-right: 10px"
+          @change="fetchLogs">
+          <el-option label="成功" value="success"></el-option>
+          <el-option label="失败" value="error"></el-option>
+          <el-option label="进行中" value="pending"></el-option>
         </el-select>
 
-        <el-input
-          v-model="filter.keyword"
-          placeholder="搜索日志内容"
-          style="width: 250px"
-          clearable
-          @keyup.enter="fetchLogs"
-        >
+        <el-input v-model="filter.keyword" placeholder="搜索日志内容" style="width: 250px" clearable @keyup.enter="fetchLogs">
           <template #append>
-            <el-button
-              icon="Search"
-              size="small"
-              @click="fetchLogs"
-            ></el-button>
+            <el-button icon="Search" size="small" @click="fetchLogs"></el-button>
           </template>
         </el-input>
       </div>
 
-      <el-table
-        :data="logs"
-        border
-        style="width: 100%; margin-top: 15px"
-        v-loading="loading"
-      >
-        <el-table-column
-          prop="id"
-          label="ID"
-        ></el-table-column>
-        <el-table-column
-          prop="serverName"
-          label="服务器"
-        ></el-table-column>
-        <el-table-column
-          prop="type"
-          label="类型"
-        >
+      <el-table :data="logs" border style="width: 100%; margin-top: 15px" v-loading="loading">
+        <el-table-column prop="id" label="ID"></el-table-column>
+        <el-table-column prop="serverName" label="服务器"></el-table-column>
+        <el-table-column prop="type" label="类型">
           <template #default="scope">
             <el-tag :type="typeTagType[scope.row.type]">
               {{ typeTextMap[scope.row.type] }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="status"
-          label="状态"
-        >
+        <el-table-column prop="status" label="状态">
           <template #default="scope">
             <el-tag :type="statusTagType[scope.row.status]">
               {{ statusTextMap[scope.row.status] }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="createdAt"
-          label="创建时间"
-        ></el-table-column>
+        <el-table-column prop="createdAt" label="创建时间"></el-table-column>
         <el-table-column label="操作">
           <template #default="scope">
-            <el-button
-              size="small"
-              type="text"
-              @click="viewLogDetail(scope.row.id)"
-            >
+            <el-button size="small" type="text" @click="viewLogDetail(scope.row.id)">
               查看详情
             </el-button>
-            <el-button
-              size="small"
-              type="text"
-              text-color="#ff4d4f"
-              @click="handleDeleteLog(scope.row.id)"
-            >
+            <el-button size="small" type="text" text-color="#ff4d4f" @click="handleDeleteLog(scope.row.id)">
               删除
             </el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="pagination.page"
-        :page-sizes="[10, 20, 50]"
-        :page-size="pagination.limit"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="pagination.total"
-        style="margin-top: 15px; text-align: right"
-      ></el-pagination>
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+        :current-page="pagination.page" :page-sizes="[10, 20, 50]" :page-size="pagination.limit"
+        layout="total, sizes, prev, pager, next, jumper" :total="pagination.total"
+        style="margin-top: 15px; text-align: right"></el-pagination>
     </el-card>
 
     <!-- 日志详情对话框 -->
-    <el-dialog
-      v-model="detailVisible"
-      title="日志详情"
-      width="800px"
-      :before-close="handleDetailClose"
-    >
-      <pre
-        class="log-detail-content"
-        v-if="currentLog"
-        >{{ currentLog.message }}</pre
-      >
+    <el-dialog v-model="detailVisible" title="日志详情" width="800px" :before-close="handleDetailClose">
+      <pre class="log-detail-content" v-if="currentLog">{{ currentLog.message }}</pre>
       <div v-else>加载中...</div>
 
       <template #footer>

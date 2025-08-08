@@ -61,7 +61,7 @@ class SSHService {
         stream.stderr.on('data', (data) => {
           stderr += data.toString();
           if (logCallback) {
-            logCallback(`错误: ${data.toString().trim()}`);
+            logCallback(`输出E: ${data.toString().trim()}`);
           }
         });
         
@@ -73,11 +73,57 @@ class SSHService {
           if (code !== 0) {
             return reject(new Error(`命令执行失败，退出码: ${code}, 错误信息: ${stderr}`));
           }
-          
-          resolve(stdout);
+          const isStdoutEmpty = !stdout.trim();
+          const result = isStdoutEmpty ? stderr : stdout;
+        
+          resolve(result);
         });
       });
     });
+  }
+
+  /**
+   * 测试Java路径
+   * @param {Object} conn - SSH连接对象
+   * @param {string} javaPath - Java路径
+   * @returns {Promise}
+   */
+  async testJavaPath(conn, javaPath) {
+    if (!javaPath) {
+      throw new Error('Java路径未配置');
+    }
+    
+    try {
+      console.log("execute command");
+      
+      const output = await this.executeCommand(conn, `${javaPath} -version`, (message) => {
+        console.log(message);
+      });
+      console.log("execute command 11", output);
+      return output.includes('java version') || output.includes('openjdk version');
+    } catch (err) {
+      console.log(err.message,'....')
+      throw new Error(`Java路径测试失败: ${err.message}`);
+    }
+  }
+
+  /**
+   * 测试Nginx路径
+   * @param {Object} conn - SSH连接对象
+   * @param {string} nginxPath - Nginx路径
+   * @returns {Promise}
+   */
+  async testNginxPath(conn, nginxPath) {
+    if (!nginxPath) {
+      throw new Error('Nginx路径未配置');
+    }
+    
+    try {
+      const output = await this.executeCommand(conn, `${nginxPath} -v`);
+      return output.includes('nginx version');
+    } catch (err) {
+      throw new Error(`Nginx路径测试失败: ${err.message}`);
+    }
   }
 
   /**
@@ -205,10 +251,11 @@ class SSHService {
           logCallback
         );
       } else {
-        // 默认重启命令（简单示例）
+        // 默认重启命令（使用配置的Java路径）
+        const javaCmd = server.javaPath ? server.javaPath : 'java';
         await this.executeCommand(
           conn, 
-          `cd ${targetPath} && nohup java -jar ${finalFileName} > app.log 2>&1 &`, 
+          `cd ${targetPath} && nohup ${javaCmd} -jar ${finalFileName} > app.log 2>&1 &`, 
           logCallback
         );
       }
@@ -286,9 +333,10 @@ class SSHService {
       
       // 7. 如果需要，重载Nginx
       if (reloadNginx) {
+        const nginxCmd = server.nginxPath ? server.nginxPath : 'nginx';
         await this.executeCommand(
           conn, 
-          'sudo systemctl reload nginx', 
+          `sudo ${nginxCmd} -s reload`, 
           logCallback
         );
       }
