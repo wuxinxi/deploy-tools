@@ -8,7 +8,8 @@
 
       <el-form :model="deployForm" ref="deployFormRef" :rules="formRules" label-width="120px" style="margin-top: 20px;">
         <el-form-item label="目标服务器" prop="serverId">
-          <el-select v-model="deployForm.serverId" placeholder="请选择服务器" clearable style="width: 100%;">
+          <el-select v-model="deployForm.serverId" placeholder="请选择服务器" clearable style="width: 100%;"
+            @change="handleSelect">
             <el-option v-for="server in servers" :key="server.id"
               :label="`${server.name} (${server.ip}:${server.port})`" :value="server.id"></el-option>
           </el-select>
@@ -245,6 +246,13 @@ const startLogPolling = () => {
 onMounted(() => {
   fetchServers()
 })
+
+function handleSelect(id) {
+  const server = servers.value.find(s => s.id === id)
+  if (!server) return
+  deployForm.targetPath = server.deployPath || ''
+  deployForm.restartScript = server.restartScript || ''
+}
 </script>
 
 <style scoped>
