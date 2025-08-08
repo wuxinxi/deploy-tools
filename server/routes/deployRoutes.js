@@ -105,9 +105,11 @@ router.post('/backend', jarUpload.single('jarFile'), async (req, res) => {
     // 日志回调函数
     const logCallback = async (message) => {
       console.log(`[部署日志] ${message}`);
-      // 更新日志
+      // 获取当前日志内容
+      const currentLog = await Log.findById(log.id);
+      // 更新日志 - 确保立即刷新
       await Log.update(log.id, {
-        message: `${log.message}\n${message}`,
+        message: `${currentLog.message}\n${message}`,
         updatedAt: new Date()
       });
     };
@@ -192,9 +194,11 @@ router.post('/frontend', distUpload.single('distFile'), async (req, res) => {
     // 日志回调函数
     const logCallback = async (message) => {
       console.log(`[部署日志] ${message}`);
-      // 更新日志
+      // 获取当前日志内容
+      const currentLog = await Log.findById(log.id);
+      // 更新日志 - 确保立即刷新
       await Log.update(log.id, {
-        message: `${log.message}\n${message}`,
+        message: `${currentLog.message}\n${message}`,
         updatedAt: new Date()
       });
     };

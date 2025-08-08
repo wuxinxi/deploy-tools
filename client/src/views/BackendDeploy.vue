@@ -219,7 +219,18 @@ const startLogPolling = () => {
     try {
       const res = await getLogDetail(logId.value)
       if (res.success) {
-        deployLog.value = res.data.message
+        // 仅追加新日志内容，而不是全部替换
+        const newLogs = res.data.message.replace(deployLog.value, '')
+        if (newLogs) {
+          deployLog.value += newLogs
+          // 自动滚动到日志底部
+          setTimeout(() => {
+            const logContainer = document.querySelector('.log-content')
+            if (logContainer) {
+              logContainer.scrollTop = logContainer.scrollHeight
+            }
+          }, 50)
+        }
 
         // 如果部署完成，停止轮询
         if (res.data.status !== 'pending') {
@@ -239,7 +250,7 @@ const startLogPolling = () => {
       console.error('获取部署日志失败:', err)
       ElMessage.error('获取部署日志失败: ' + (err.message || '未知错误'))
     }
-  }, 2000) // 每2秒查询一次
+  }, 1000) // 缩短为每1秒查询一次
 }
 
 // 页面加载时获取服务器列表
