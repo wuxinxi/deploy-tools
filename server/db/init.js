@@ -31,6 +31,8 @@ function createTables() {
       port INTEGER NOT NULL DEFAULT 22,
       username TEXT NOT NULL,
       password TEXT NOT NULL,
+      javaPath TEXT,
+      nginxPath TEXT,
       remark TEXT,
       createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP

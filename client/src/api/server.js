@@ -47,10 +47,28 @@ export const deleteServer = (id) => {
 }
 
 /**
- * 测试服务器连接
+ * 测试SSH连接
  * @param {string} id - 服务器ID
  * @returns {Promise}
  */
-export const testServerConnection = (id) => {
-  return request.post(`/servers/${id}/test-connection`)
+export const testSSHConnection = (id) => {
+  return request.post(`/servers/${id}/test-ssh`)
+}
+
+/**
+ * 测试Java路径
+ * @param {string} id - 服务器ID
+ * @returns {Promise}
+ */
+export const testJavaPath = (id) => {
+  return request.post(`/servers/${id}/test-java`)
+}
+
+/**
+ * 测试Nginx路径
+ * @param {string} id - 服务器ID
+ * @returns {Promise}
+ */
+export const testNginxPath = (id) => {
+  return request.post(`/servers/${id}/test-nginx`)
 }

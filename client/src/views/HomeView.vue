@@ -8,7 +8,9 @@
         <div class="stats-grid">
           <el-card class="stat-card">
             <div class="stat-icon">
-              <el-icon><Connection /></el-icon>
+              <el-icon>
+                <Connection />
+              </el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ serverCount }}</div>
@@ -18,7 +20,9 @@
 
           <el-card class="stat-card">
             <div class="stat-icon">
-              <el-icon><Monitor /></el-icon>
+              <el-icon>
+                <Monitor />
+              </el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ deployCountToday }}</div>
@@ -28,7 +32,9 @@
 
           <el-card class="stat-card">
             <div class="stat-icon">
-              <el-icon><CircleCheck /></el-icon>
+              <el-icon>
+                <CircleCheck />
+              </el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ successRate }}%</div>
@@ -45,61 +51,27 @@
           <h2>最近部署活动</h2>
         </div>
 
-        <el-table
-          :data="recentDeployments"
-          border
-          style="width: 100%"
-        >
-          <el-table-column
-            prop="time"
-            label="时间"
-            width="180"
-          ></el-table-column>
-          <el-table-column
-            prop="serverName"
-            label="服务器"
-            width="180"
-          ></el-table-column>
-          <el-table-column
-            prop="type"
-            label="类型"
-            width="100"
-          >
+        <el-table :data="recentDeployments" border style="width: 100%">
+          <el-table-column prop="time" label="时间" width="180"></el-table-column>
+          <el-table-column prop="serverName" label="服务器" width="180"></el-table-column>
+          <el-table-column prop="type" label="类型" width="100">
             <template #default="scope">
-              <el-tag
-                :type="scope.row.type === 'backend' ? 'primary' : 'success'"
-              >
+              <el-tag :type="scope.row.type === 'backend' ? 'primary' : 'success'">
                 {{ scope.row.type === 'backend' ? '后端' : '前端' }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column
-            prop="status"
-            label="状态"
-            width="100"
-          >
+          <el-table-column prop="status" label="状态" width="100">
             <template #default="scope">
-              <el-tag
-                :type="scope.row.status === 'success' ? 'success' : 'danger'"
-              >
+              <el-tag :type="scope.row.status === 'success' ? 'success' : 'danger'">
                 {{ scope.row.status === 'success' ? '成功' : '失败' }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column
-            prop="message"
-            label="详情"
-          ></el-table-column>
-          <el-table-column
-            label="操作"
-            width="100"
-          >
+          <el-table-column prop="message" label="详情"></el-table-column>
+          <el-table-column label="操作" width="100">
             <template #default="scope">
-              <el-button
-                size="small"
-                type="text"
-                @click="viewDeploymentDetail(scope.row.id)"
-              >
+              <el-button size="small" type="text" @click="viewDeploymentDetail(scope.row.id)">
                 详情
               </el-button>
             </template>

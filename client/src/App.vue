@@ -1,37 +1,40 @@
 <template>
   <div id="app">
     <el-container style="min-height: 100vh">
-      <el-aside
-        width="200px"
-        class="aside-container"
-      >
+      <el-aside width="200px" class="aside-container">
         <div class="logo">
-          <el-icon class="logo-icon"><Cpu /></el-icon>
+          <el-icon class="logo-icon">
+            <Cpu />
+          </el-icon>
           <span class="logo-text">运维部署工具</span>
         </div>
-        <el-menu
-          default-active="home"
-          class="el-menu-vertical-demo"
-          @select="handleMenuSelect"
-        >
+        <el-menu default-active="home" class="el-menu-vertical-demo" @select="handleMenuSelect">
           <el-menu-item index="home">
-            <el-icon><House /></el-icon>
+            <el-icon>
+              <House />
+            </el-icon>
             <span>首页</span>
           </el-menu-item>
           <el-menu-item index="servers">
-            <el-icon><Connection /></el-icon>
+            <el-icon>
+              <Connection />
+            </el-icon>
             <span>服务器管理</span>
           </el-menu-item>
           <el-sub-menu index="deploy">
             <template #title>
-              <el-icon><Monitor /></el-icon>
+              <el-icon>
+                <Monitor />
+              </el-icon>
               <span>应用部署</span>
             </template>
             <el-menu-item index="deploy-backend">后端部署</el-menu-item>
             <el-menu-item index="deploy-frontend">前端部署</el-menu-item>
           </el-sub-menu>
           <el-menu-item index="logs">
-            <el-icon><Document /></el-icon>
+            <el-icon>
+              <Document />
+            </el-icon>
             <span>部署日志</span>
           </el-menu-item>
         </el-menu>
@@ -46,7 +49,9 @@
                   <User />
                 </el-avatar>
                 <span class="username">管理员</span>
-                <el-icon class="arrow-icon"><ArrowDown /></el-icon>
+                <el-icon class="arrow-icon">
+                  <ArrowDown />
+                </el-icon>
               </span>
               <template #dropdown>
                 <el-dropdown-menu>
@@ -180,11 +185,11 @@ const handleMenuSelect = (index) => {
 }
 
 /* 确保子菜单标题在hover时的样式 */
-:deep(.el-sub-menu) > .el-sub-menu__title {
+:deep(.el-sub-menu)>.el-sub-menu__title {
   background-color: #001529;
 }
 
-:deep(.el-sub-menu) > .el-sub-menu__title:hover {
+:deep(.el-sub-menu)>.el-sub-menu__title:hover {
   background-color: #1890ff !important;
 }
 

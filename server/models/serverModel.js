@@ -33,7 +33,14 @@ class Server {
         if (err) {
           reject(err);
         } else {
-          resolve(rows);
+          // 确保每个服务器都有三个状态字段
+          const servers = rows.map(server => ({
+            ...server,
+            sshStatus: server.sshStatus || 'untested',
+            javaStatus: server.javaStatus || 'untested',
+            nginxStatus: server.nginxStatus || 'untested'
+          }));
+          resolve(servers);
         }
       });
     });
@@ -63,12 +70,12 @@ class Server {
    */
   static create(serverData) {
     return new Promise((resolve, reject) => {
-      const { name, ip, port, username, password, remark } = serverData;
+      const { name, ip, port, username, password, javaPath, nginxPath, remark } = serverData;
       
       db.run(
-        `INSERT INTO servers (name, ip, port, username, password, remark) 
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [name, ip, port, username, password, remark || ''],
+        `INSERT INTO servers (name, ip, port, username, password, javaPath, nginxPath, remark, sshStatus, javaStatus, nginxStatus) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'untested', 'untested', 'untested')`,
+        [name, ip, port, username, password, javaPath || null, nginxPath || null, remark || ''],
         function(err) {
           if (err) {
             reject(err);
@@ -89,13 +96,13 @@ class Server {
    */
   static update(id, serverData) {
     return new Promise((resolve, reject) => {
-      const { name, ip, port, username, password, remark } = serverData;
+      const { name, ip, port, username, password, javaPath, nginxPath, remark } = serverData;
       
       db.run(
         `UPDATE servers 
-         SET name = ?, ip = ?, port = ?, username = ?, password = ?, remark = ?, updatedAt = CURRENT_TIMESTAMP
+         SET name = ?, ip = ?, port = ?, username = ?, password = ?, javaPath = ?, nginxPath = ?, remark = ?, updatedAt = CURRENT_TIMESTAMP
          WHERE id = ?`,
-        [name, ip, port, username, password, remark || '', id],
+        [name, ip, port, username, password, javaPath || null, nginxPath || null, remark || '', id],
         function(err) {
           if (err) {
             reject(err);
