@@ -41,14 +41,6 @@ class Server {
             nginxStatus: server.nginxStatus || 'untested'
           }));
           resolve(servers);
-          // 确保每个服务器都有三个状态字段
-          const servers = rows.map(server => ({
-            ...server,
-            sshStatus: server.sshStatus || 'untested',
-            javaStatus: server.javaStatus || 'untested',
-            nginxStatus: server.nginxStatus || 'untested'
-          }));
-          resolve(servers);
         }
       });
     });

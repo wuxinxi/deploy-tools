@@ -202,8 +202,6 @@ router.delete('/:id', async (req, res) => {
 
 // 测试SSH连接
 router.post('/:id/test-ssh', async (req, res) => {
-// 测试SSH连接
-router.post('/:id/test-ssh', async (req, res) => {
   try {
     const server = await Server.findById(req.params.id);
     
@@ -230,25 +228,10 @@ router.post('/:id/test-ssh', async (req, res) => {
       sshStatus: 'success'
     });
     
-    // 更新服务器状态
-    const updatedServer = await Server.update(req.params.id, {
-      name: server.name,
-      ip: server.ip,
-      port: server.port,
-      username: server.username,
-      password: server.password,
-      javaPath: server.javaPath,
-      nginxPath: server.nginxPath,
-      remark: server.remark,
-      sshStatus: 'success'
-    });
-    
     // 记录日志
     await Log.create({
       type: 'ssh_test',
-      type: 'ssh_test',
       serverId: server.id,
-      message: `SSH连接测试成功: ${server.name} (${server.ip})`,
       message: `SSH连接测试成功: ${server.name} (${server.ip})`,
       status: 'success'
     });
@@ -430,181 +413,6 @@ router.post('/:id/test-nginx', async (req, res) => {
       success: true,
       message: valid ? 'Nginx路径测试成功' : 'Nginx路径测试失败',
       valid
-      message: 'SSH连接测试成功'
-    });
-  } catch (err) {
-    const server = await Server.findById(req.params.id);
-    if (!server) {
-      return res.status(404).json({
-        success: false,
-        message: '服务器不存在'
-      });
-    }
-    
-    // 更新服务器状态
-    const updatedServer = await Server.update(req.params.id, {
-      name: server.name,
-      ip: server.ip,
-      port: server.port,
-      username: server.username,
-      password: server.password,
-      javaPath: server.javaPath,
-      nginxPath: server.nginxPath,
-      remark: server.remark,
-      sshStatus: 'failed'
-    });
-    
-    // 记录错误日志
-    await Log.create({
-      type: 'ssh_test',
-      serverId: req.params.id,
-      message: `SSH连接测试失败: ${err.message}`,
-      status: 'error'
-    });
-    
-    res.status(500).json({
-      success: false,
-      message: 'SSH连接测试失败',
-      error: err.message
-    });
-  }
-});
-
-// 测试Java路径
-router.post('/:id/test-java', async (req, res) => {  
-  try {
-    const server = await Server.findById(req.params.id);
-    
-    if (!server) {
-      return res.status(404).json({
-        success: false,
-        message: '服务器不存在'
-      });
-    }
-    
-    if (!server.javaPath) {
-      return res.status(400).json({
-        success: false,
-        message: '未配置Java路径'
-      });
-    }
-    
-    const conn = await sshService.connectToServer(server);
-    const valid = await sshService.testJavaPath(conn, server.javaPath);
-    conn.end();
-    
-    // 更新服务器状态
-    const updatedServer = await Server.update(req.params.id, {
-      name: server.name,
-      ip: server.ip,
-      port: server.port,
-      username: server.username,
-      password: server.password,
-      javaPath: server.javaPath,
-      nginxPath: server.nginxPath,
-      remark: server.remark,
-      javaStatus: valid ? 'success' : 'failed'
-    });
-    
-    // 记录日志
-    await Log.create({
-      type: 'java_test',
-      serverId: server.id,
-      message: `Java路径测试${valid ? '成功' : '失败'}: ${server.javaPath}`,
-      status: valid ? 'success' : 'error'
-    });
-    
-    res.json({
-      success: valid,
-      message: valid ? 'Java路径测试成功' : 'Java路径测试失败',
-      valid
-    });
-  } catch (err) {
-    const server = await Server.findById(req.params.id);
-    if (!server) {
-      return res.status(404).json({
-        success: false,
-        message: '服务器不存在'
-      });
-    }
-    
-    // 更新服务器状态
-    const updatedServer = await Server.update(req.params.id, {
-      name: server.name,
-      ip: server.ip,
-      port: server.port,
-      username: server.username,
-      password: server.password,
-      javaPath: server.javaPath,
-      nginxPath: server.nginxPath,
-      remark: server.remark,
-      javaStatus: 'failed'
-    });
-    
-    // 记录错误日志
-    await Log.create({
-      type: 'java_test',
-      serverId: req.params.id,
-      message: `Java路径测试失败: ${err.message}`,
-      status: 'error'
-    });
-    
-    res.status(500).json({
-      success: false,
-      message: 'Java路径测试失败',
-      error: err.message
-    });
-  }
-});
-
-// 测试Nginx路径
-router.post('/:id/test-nginx', async (req, res) => {
-  try {
-    const server = await Server.findById(req.params.id);
-    
-    if (!server) {
-      return res.status(404).json({
-        success: false,
-        message: '服务器不存在'
-      });
-    }
-    
-    if (!server.nginxPath) {
-      return res.status(400).json({
-        success: false,
-        message: '未配置Nginx路径'
-      });
-    }
-    
-    const conn = await sshService.connectToServer(server);
-    const valid = await sshService.testNginxPath(conn, server.nginxPath);
-    conn.end();
-    
-    // 更新服务器状态
-    const updatedServer = await Server.update(req.params.id, {
-      name: server.name,
-      ip: server.ip,
-      port: server.port,
-      username: server.username,
-      password: server.password,
-      javaPath: server.javaPath,
-      nginxPath: server.nginxPath,
-      remark: server.remark,
-      nginxStatus: valid ? 'success' : 'failed'
-    });
-    
-    // 记录日志
-    await Log.create({
-      type: 'nginx_test',
-      serverId: server.id,
-      message: `Nginx路径测试${valid ? '成功' : '失败'}: ${server.nginxPath}`,
-      status: valid ? 'success' : 'error'
-    });
-    
-    res.json({
-      success: true,
-      message: valid ? 'Nginx路径测试成功' : 'Nginx路径测试失败',
-      valid
     });
   } catch (err) {
     const server = await Server.findById(req.params.id);
@@ -628,40 +436,16 @@ router.post('/:id/test-nginx', async (req, res) => {
       nginxStatus: 'failed'
     });
     
-    const server = await Server.findById(req.params.id);
-    if (!server) {
-      return res.status(404).json({
-        success: false,
-        message: '服务器不存在'
-      });
-    }
-    
-    // 更新服务器状态
-    const updatedServer = await Server.update(req.params.id, {
-      name: server.name,
-      ip: server.ip,
-      port: server.port,
-      username: server.username,
-      password: server.password,
-      javaPath: server.javaPath,
-      nginxPath: server.nginxPath,
-      remark: server.remark,
-      nginxStatus: 'failed'
-    });
-    
     // 记录错误日志
     await Log.create({
       type: 'nginx_test',
-      type: 'nginx_test',
       serverId: req.params.id,
-      message: `Nginx路径测试失败: ${err.message}`,
       message: `Nginx路径测试失败: ${err.message}`,
       status: 'error'
     });
     
     res.status(500).json({
       success: false,
-      message: 'Nginx路径测试失败',
       message: 'Nginx路径测试失败',
       error: err.message
     });
