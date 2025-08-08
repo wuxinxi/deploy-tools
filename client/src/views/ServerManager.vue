@@ -100,7 +100,7 @@
     </el-card>
 
     <!-- 服务器表单对话框 -->
-    <el-dialog v-model="dialogVisible" :title="formTitle" width="500px">
+    <el-dialog v-model="dialogVisible" :title="formTitle" width="600px" align-center class="server-form-dialog">
       <el-form :model="serverForm" ref="serverFormRef" :rules="formRules" label-width="100px" style="margin-top: 20px">
         <el-form-item label="服务器名称" prop="name">
           <el-input v-model="serverForm.name" placeholder="请输入服务器名称"></el-input>
@@ -132,6 +132,16 @@
         <el-form-item label="Nginx路径">
           <el-input v-model="serverForm.nginxPath" placeholder="例如: /usr/sbin/nginx"></el-input>
           <div class="form-hint">Nginx可执行文件的全路径</div>
+        </el-form-item>
+
+        <el-form-item label="部署路径">
+          <el-input v-model="serverForm.deployPath" placeholder="例如: /opt/apps"></el-input>
+          <div class="form-hint">应用部署的目标路径</div>
+        </el-form-item>
+
+        <el-form-item label="重启脚本">
+          <el-input v-model="serverForm.restartScript" placeholder="例如: /opt/scripts/restart.sh"></el-input>
+          <div class="form-hint">应用重启脚本的完整路径</div>
         </el-form-item>
 
         <el-form-item label="备注">
@@ -191,6 +201,8 @@ const serverForm = reactive({
   password: '',
   javaPath: '',
   nginxPath: '',
+  deployPath: '',
+  restartScript: '',
   remark: '',
 })
 
@@ -271,6 +283,8 @@ const openServerForm = (server = null) => {
       password: server.password,
       javaPath: server.javaPath || '',
       nginxPath: server.nginxPath || '',
+      deployPath: server.deployPath || '',
+      restartScript: server.restartScript || '',
       remark: server.remark || '',
     })
   } else {
@@ -284,6 +298,8 @@ const openServerForm = (server = null) => {
       password: '',
       javaPath: '',
       nginxPath: '',
+      deployPath: '',
+      restartScript: '',
       remark: '',
     })
   }
@@ -442,6 +458,12 @@ onMounted(() => {
 <style scoped>
 .server-manager-container {
   padding: 20px;
+}
+
+.server-form-dialog {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .card-header {

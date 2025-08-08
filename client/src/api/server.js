@@ -24,7 +24,11 @@ export const getServerDetail = (id) => {
  * @returns {Promise}
  */
 export const addServer = (data) => {
-  return request.post('/servers', data)
+  return request.post('/servers', {
+    ...data,
+    deployPath: data.deployPath || null,
+    restartScript: data.restartScript || null
+  })
 }
 
 /**
@@ -34,7 +38,11 @@ export const addServer = (data) => {
  * @returns {Promise}
  */
 export const updateServer = (id, data) => {
-  return request.put(`/servers/${id}`, data)
+  return request.put(`/servers/${id}`, {
+    ...data,
+    deployPath: data.deployPath || null,
+    restartScript: data.restartScript || null
+  })
 }
 
 /**

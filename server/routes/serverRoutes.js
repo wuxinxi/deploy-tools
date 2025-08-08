@@ -63,7 +63,7 @@ router.get('/:id', async (req, res) => {
 // 添加服务器
 router.post('/', async (req, res) => {
   try {
-    const { name, ip, port, username, password, javaPath, nginxPath, remark } = req.body;
+    const { name, ip, port, username, password, javaPath, nginxPath, remark, deployPath, restartScript } = req.body;
     
     // 验证必填字段
     if (!name || !ip || !port || !username || !password) {
@@ -81,7 +81,9 @@ router.post('/', async (req, res) => {
       password,
       javaPath: javaPath || null,
       nginxPath: nginxPath || null,
-      remark: remark || ''
+      remark: remark || '',
+      deployPath: deployPath || null,
+      restartScript: restartScript || null
     });
     
     // 记录日志
@@ -109,7 +111,7 @@ router.post('/', async (req, res) => {
 // 更新服务器
 router.put('/:id', async (req, res) => {
   try {
-    const { name, ip, port, username, password, javaPath, nginxPath, remark } = req.body;
+    const { name, ip, port, username, password, javaPath, nginxPath, remark, deployPath, restartScript } = req.body;
     
     // 验证必填字段
     if (!name || !ip || !port || !username || !password) {
@@ -136,7 +138,9 @@ router.put('/:id', async (req, res) => {
       password,
       javaPath: javaPath || null,
       nginxPath: nginxPath || null,
-      remark: remark || ''
+      remark: remark || '',
+      deployPath: deployPath || null,
+      restartScript: restartScript || null
     });
     
     // 记录日志

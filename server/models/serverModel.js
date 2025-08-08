@@ -70,12 +70,12 @@ class Server {
    */
   static create(serverData) {
     return new Promise((resolve, reject) => {
-      const { name, ip, port, username, password, javaPath, nginxPath, remark } = serverData;
+      const { name, ip, port, username, password, javaPath, nginxPath, remark, deployPath, restartScript } = serverData;
       
-      db.run(
-        `INSERT INTO servers (name, ip, port, username, password, javaPath, nginxPath, remark, sshStatus, javaStatus, nginxStatus) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'untested', 'untested', 'untested')`,
-        [name, ip, port, username, password, javaPath || null, nginxPath || null, remark || ''],
+    db.run(
+        `INSERT INTO servers (name, ip, port, username, password, javaPath, nginxPath, remark, sshStatus, javaStatus, nginxStatus, deployPath, restartScript) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'untested', 'untested', 'untested', ?, ?)`,
+        [name, ip, port, username, password, javaPath || null, nginxPath || null, remark || '', deployPath || null, restartScript || null],
         function(err) {
           if (err) {
             reject(err);
@@ -96,13 +96,13 @@ class Server {
    */
   static update(id, serverData) {
     return new Promise((resolve, reject) => {
-      const { name, ip, port, username, password, javaPath, nginxPath, remark } = serverData;
+      const { name, ip, port, username, password, javaPath, nginxPath, remark, deployPath, restartScript } = serverData;
       
       db.run(
         `UPDATE servers 
-         SET name = ?, ip = ?, port = ?, username = ?, password = ?, javaPath = ?, nginxPath = ?, remark = ?, updatedAt = CURRENT_TIMESTAMP
+         SET name = ?, ip = ?, port = ?, username = ?, password = ?, javaPath = ?, nginxPath = ?, remark = ?, deployPath = ?, restartScript = ?, updatedAt = CURRENT_TIMESTAMP
          WHERE id = ?`,
-        [name, ip, port, username, password, javaPath || null, nginxPath || null, remark || '', id],
+        [name, ip, port, username, password, javaPath || null, nginxPath || null, remark || '', deployPath || null, restartScript || null, id],
         function(err) {
           if (err) {
             reject(err);
