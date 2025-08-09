@@ -317,14 +317,38 @@ class SSHService {
         logCallback
       );
       
-      // 5. 解压文件到目标目录
+      // 5. 检查并备份已存在的dist文件夹
+      const distPath = `${targetPath}/dist`;
+      try {
+        await this.executeCommand(conn, `test -d "${distPath}"`, logCallback);
+        
+        // 创建备份
+        const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD格式
+        const backupPath = `${targetPath}/dist.bak.${currentDate}`;
+        await this.executeCommand(
+          conn,
+          `mv "${distPath}" "${backupPath}"`,
+          logCallback
+        );
+        
+        if (logCallback) {
+          logCallback(`已备份原dist文件夹为: dist.bak.${currentDate}`);
+        }
+      } catch (err) {
+        // dist文件夹不存在，无需备份
+        if (logCallback) {
+          logCallback(`目标dist文件夹不存在，无需备份`);
+        }
+      }
+      
+      // 6. 解压文件到目标目录
       await this.executeCommand(
         conn, 
         `unzip -o ${remoteZipPath} -d ${targetPath}`, 
         logCallback
       );
       
-      // 6. 删除远程临时ZIP文件
+      // 7. 删除远程临时ZIP文件
       await this.executeCommand(
         conn, 
         `rm -f ${remoteZipPath}`, 
