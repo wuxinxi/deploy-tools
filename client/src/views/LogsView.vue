@@ -120,6 +120,10 @@ const typeTextMap = {
   connection_test: '连接测试',
   backend_deploy: '后端部署',
   frontend_deploy: '前端部署',
+  server_manage: '服务器配置',
+  ssh_test: 'SSH 测试',
+  java_test: 'Java 测试',
+  nginx_test: 'Nginx 测试',
 }
 
 // 日志类型标签样式映射
