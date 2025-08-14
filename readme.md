@@ -11,3 +11,9 @@ cp -r dist ../server/public
 
 cd ../server
 npm start
+
+# 注意事项
+
+1. 需要在服务器上安装 node.js
+2. 需要安装 JDK
+3. 需要安装 unzip

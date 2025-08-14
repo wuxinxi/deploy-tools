@@ -69,7 +69,7 @@
         </el-main>
 
         <el-footer class="footer-container">
-          <p>运维自动化部署工具 &copy; 2023</p>
+          <p>运维自动化部署工具 &copy; 2025</p>
         </el-footer>
       </el-container>
     </el-container>
