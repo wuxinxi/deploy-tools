@@ -142,6 +142,14 @@ const handleMenuSelect = (index) => {
   width: 200px;
 }
 
+.el-sub-menu span {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.el-sub-menu .el-icon {
+  color: rgba(255, 255, 255, 0.7);
+}
+
 .el-menu-item,
 .el-sub-menu__title {
   color: rgba(255, 255, 255, 0.7);
